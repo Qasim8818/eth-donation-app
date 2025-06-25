@@ -6,6 +6,7 @@ import DonationHistory from './components/DonationHistory';
 import DarkModeToggle from './components/DarkModeToggle';
 import QRCodeDisplay from './components/QRCodeDisplay';
 import NFTReward from './components/NFTReward';
+import Analytics from './components/Analytics';
 
 function App() {
   const donationAddress = '0x1234567890abcdef1234567890abcdef12345678'; // Replace with actual donation address
@@ -20,6 +21,7 @@ function App() {
       <DarkModeToggle />
       <QRCodeDisplay value={donationAddress} />
       <NFTReward />
+      <Analytics />
     </div>
   );
 }
