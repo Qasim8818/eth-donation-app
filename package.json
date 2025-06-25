@@ -1,22 +1,13 @@
 {
   "name": "eth-donation-app",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start-backend": "cd backend && npm install && npm run dev",
+    "start-frontend": "cd frontend && npm install && npm run dev",
+    "start": "concurrently \"npm run start-backend\" \"npm run start-frontend\""
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^6.0.0",
-    "@nomicfoundation/hardhat-verify": "^2.0.14",
-    "ethers": "^6.14.4",
-    "hardhat": "^2.25.0"
-  },
-  "dependencies": {
-    "dotenv": "^16.5.0"
+    "concurrently": "^8.2.0"
   }
 }
