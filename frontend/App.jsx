@@ -8,8 +8,8 @@ import QRCodeDisplay from './components/QRCodeDisplay';
 import NFTReward from './components/NFTReward';
 
 function App() {
-  const donationAddress = '0xYourDonationAddressHere'; // Replace with actual donation address
-  const donationConfirmed = false; // Placeholder for donation status
+  const donationAddress = '0x1234567890abcdef1234567890abcdef12345678'; // Replace with actual donation address
+  const donationConfirmed = true; // Example: set to true for testing
 
   return (
     <div>
