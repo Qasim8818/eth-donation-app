@@ -3,11 +3,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const Donation = require('./models/Donation')
-const authMiddleware = require('../middleware/authMiddleware');
-const adminAuthRoutes = require('./routes/adminAuth');
+const authMiddleware = require('./middleware/authMiddleware');
 const userAuthRoutes = require('./routes/userAuth');
 const authRoutes = require('./routes/auth');
-const auth = require('../middleware/auth');
+const auth = require('./middleware/auth');
 
 
 const app = express(); 
@@ -16,7 +15,6 @@ const port = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use('/admin', adminAuthRoutes);
 app.use('/auth', userAuthRoutes);
 app.use('/api/auth', authRoutes);
 
