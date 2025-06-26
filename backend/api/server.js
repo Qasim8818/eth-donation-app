@@ -2,12 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const Donation = require('./models/Donation')
-const authMiddleware = require('./middleware/authMiddleware');
+const Donation = require('../models/Donation')
+const authMiddleware = require('../middleware/authMiddleware');
 const adminAuthRoutes = require('./routes/adminAuth');
-const userAuthRoutes = require('./routes/userAuth');
-const authRoutes = require('./routes/auth');
-const auth = require('./middleware/auth');
+const userAuthRoutes = require('../routes/userAuth');
+const authRoutes = require('../routes/auth');
+const auth = require('../middleware/auth');
 
 
 const app = express(); 
@@ -63,3 +63,5 @@ app.post('/donate', async (req, res) => {
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
+module.exports = app;
