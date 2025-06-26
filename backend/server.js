@@ -3,6 +3,12 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const Donation = require('./models/Donation')
+const authMiddleware = require('./middleware/authMiddleware');
+const adminAuthRoutes = require('./routes/adminAuth');
+const userAuthRoutes = require('./routes/userAuth');
+const authRoutes = require('./routes/auth');
+const auth = require('./middleware/auth');
+
 
 const app = express(); 
 const port = process.env.PORT || 5000;
@@ -10,6 +16,9 @@ const port = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use('/admin', adminAuthRoutes);
+app.use('/auth', userAuthRoutes);
+app.use('/api/auth', authRoutes);
 
 // MongoDB connection
 const mongoURI = process.env.CONNECTION_STRING || 'mongodb+srv://naeembangash57:naeem.18435@cluster0.mmdca.mongodb.net/eth-donation-app';
@@ -30,13 +39,10 @@ app.get('/', (req, res) => {
 });
 
 // Get all donations (admin route)
-app.get('/donations', async (req, res) => {
-  try {
-    const donations = await Donation.find().sort({ timestamp: -1 });
-    res.json(donations);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
+app.get('/donations', auth, async (req, res) => {
+  const userId = req.user.userId;
+  const donations = await Donation.find({ walletAddress: req.user.email }).sort({ timestamp: -1 });
+  res.json(donations);
 });
 
 // Add a new donation

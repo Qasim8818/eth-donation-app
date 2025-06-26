@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Donate ETH</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+      --text: #000;
+      --card: #ffffff;
+    }
+
+    body.dark {
+      --bg: linear-gradient(135deg, #1c1c1c, #121212);
+      --text: #f5f5f5;
+      --card: #222;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    button, input {
+      font-size: 1rem;
+      padding: 0.6rem 1.2rem;
+      margin: 0.5rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    input {
+      width: 200px;
+    }
+
+    button {
+      background: #4b6cb7;
+      color: #fff;
+    }
+
+    #darkToggle {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: transparent;
+      border: 2px solid var(--text);
+      color: var(--text);
+    }
+
+    #qr {
+      margin-top: 1.5rem;
+    }
+
+    #usdValue {
+      margin-top: 0.5rem;
+      font-weight: bold;
+    }
+
+    #thankYou {
+      margin-top: 2rem;
+      font-size: 1.8rem;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    #thankYou.show {
+      opacity: 1;
+      animation: pop 1s ease;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.8); opacity: 0; }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    #copyBtn {
+      background: #2ecc71;
+    }
+
+  </style>
+</head>
+<body>
+  <button id="darkToggle">🌙 Toggle Dark Mode</button>
+
+  <h1>💸 Donate ETH</h1>
+
+  <button onclick="connectWallet()">🔗 Connect Wallet</button><br/><br/>
+
+  <input type="text" id="amount" placeholder="Amount in ETH" oninput="convertToUSD()" />
+  <button onclick="donate()">🚀 Send Donation</button>
+  <div id="usdValue"></div>
+
+  <p id="status"></p>
+
+  <h3>Your Donation Wallet:</h3>
+  <div id="qr"></div>
+  <p><code id="walletDisplay">0x849A2C9DAd3E41e3CC9952A4a860b864B43088ea</code></p>
+  <button id="copyBtn" onclick="copyAddress()">📋 Copy Address</button>
+
+  <div id="thankYou">🎉 Thank you for your donation! 🙌</div>
+
+  <script>
+    let provider, signer;
+    const contractAddress = "0x849A2C9DAd3E41e3CC9952A4a860b864B43088ea";
+
+    async function connectWallet() {
+      if (typeof window.ethereum !== "undefined") {
+        try {
+          await window.ethereum.request({ method: "eth_requestAccounts" });
+          provider = new ethers.providers.Web3Provider(window.ethereum);
+          signer = provider.getSigner();
+          document.getElementById("status").innerText = "Wallet connected ✅";
+        } catch (error) {
+          document.getElementById("status").innerText = "❌ Error connecting wallet";
+        }
+      } else {
+        alert("Please install MetaMask.");
+      }
+    }
+
+    async function donate() {
+      const ethAmount = document.getElementById("amount").value;
+      if (!ethAmount || isNaN(ethAmount) || parseFloat(ethAmount) <= 0) {
+        alert("Enter a valid positive number");
+        return;
+      }
+
+      if (!signer) {
+        alert("Please connect your wallet first");
+        return;
+      }
+
+      try {
+        const tx = await signer.sendTransaction({
+          to: contractAddress,
+          value: ethers.utils.parseEther(ethAmount),
+        });
+        document.getElementById("status").innerText = "Transaction sent: " + tx.hash;
+        await tx.wait();
+        document.getElementById("status").innerText = "✅ Donation complete!";
+        showThankYou();
+      } catch (err) {
+        document.getElementById("status").innerText = "❌ Error: " + (err.message || err);
+      }
+    }
+
+    function copyAddress() {
+      const el = document.createElement('textarea');
+      el.value = contractAddress;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      alert('Address copied to clipboard!');
+    }
+
+    function showThankYou() {
+      const thankYou = document.getElementById('thankYou');
+      thankYou.classList.add('show');
+      setTimeout(() => {
+        thankYou.classList.remove('show');
+      }, 4000);
+    }
+
+    function convertToUSD() {
+      const eth = document.getElementById("amount").value;
+      if (!eth || isNaN(eth)) {
+        document.getElementById("usdValue").innerText = "";
+        return;
+      }
+
+      fetch("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd")
+        .then(res => res.json())
+        .then(data => {
+          const rate = data.ethereum.usd;
+          const usd = (parseFloat(eth) * rate).toFixed(2);
+          document.getElementById("usdValue").innerText = `~ $${usd} USD`;
+        })
+        .catch(() => {
+          document.getElementById("usdValue").innerText = "";
+        });
+    }
+
+    // 🌙 Dark mode toggle
+    const toggle = document.getElementById('darkToggle');
+    toggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      localStorage.setItem('darkMode', document.body.classList.contains('dark'));
+    });
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.body.classList.add('dark');
+    }
+
+    // 📷 QR code
+    QRCode.toCanvas(document.createElement('canvas'), contractAddress, function (err, canvas) {
+      if (!err) {
+        canvas.style.maxWidth = '200px';
+        canvas.style.marginTop = '10px';
+        document.getElementById("qr").appendChild(canvas);
+      }
+    });
+  </script>
+</body>
+</html>
